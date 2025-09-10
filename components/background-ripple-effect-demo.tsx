@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState, useCallback, useRef } from "react";
+import { TextGenerateEffect } from "./ui/text-generate-effect"; // ✅ Make sure path is correct
 
 const ROWS = 20;
 const COLS = 40;
@@ -133,7 +134,7 @@ export default function BackgroundRippleEffectDemo() {
       {/* Extend page height */}
       <div className="relative h-[200vh] w-full">
 
-        {/* Animated Grid Background (covers full viewport height) */}
+        {/* Animated Grid Background */}
         <div className="fixed inset-0 z-0 pointer-events-none">
           <BackgroundRippleEffect />
         </div>
@@ -147,29 +148,35 @@ export default function BackgroundRippleEffectDemo() {
           }}
         />
 
-        {/* Fade to Black Gradient Overlay (from 50% down to bottom) */}
+        {/* Fade to Black Gradient */}
         <div
           className="fixed inset-0 z-10 pointer-events-none"
           style={{
             background: "linear-gradient(to bottom, transparent 50%, rgba(0, 0, 0, 0.3) 70%, rgba(0, 0, 0, 1) 100%)",
-            maskImage: "linear-gradient(to bottom, black 50%, transparent 100%)", // Optional: smoother fade
-            WebkitMaskImage: "linear-gradient(to bottom, black 50%, transparent 100%)",
           }}
         />
 
-        {/* Content — pinned in center of viewport */}
+        {/* ✅ SCROLLABLE CONTENT — TITLE AT THE TOP (NO FIXED POSITIONING) */}
         <div className="relative z-20 flex flex-col items-center justify-start pt-60 px-4 text-center">
-          <h2 className="mx-auto max-w-4xl text-2xl font-bold text-neutral-100 md:text-4xl lg:text-7xl">
-            Welcome to Enigma
-          </h2>
-          <p className="mx-auto mt-4 max-w-xl text-neutral-400">
+          {/* ✅ ANIMATED TITLE — NOW IN NORMAL FLOW, WILL SCROLL AWAY */}
+          <TextGenerateEffect
+            words="Welcome To"
+            className="mb-6"
+            duration={2}
+          />
+          <TextGenerateEffect
+            words="ENIGMA"
+            className="mb-6"
+            duration={2.4}
+          />
+          <p className="text-lg md:text-xl text-green-400 max-w-2xl mx-auto font-medium">
             The System Software Club
           </p>
 
-          {/* Spacer to push content up and allow scrolling into fade */}
+          {/* Spacer */}
           <div className="mt-40 h-96"></div>
 
-          {/* Optional: Add more content that fades into darkness */}
+          {/* More scrollable content */}
           <div className="w-full max-w-3xl mt-20 text-neutral-500 space-y-6 opacity-90">
             <p className="text-lg">
               Scroll down to descend into the digital abyss. The grid continues infinitely —
@@ -178,9 +185,10 @@ export default function BackgroundRippleEffectDemo() {
             <p>
               Click anywhere to send a pulse — a ripple of 0s and 1s — echoing into the void.
             </p>
-            <div className="h-64"></div> {/* Extra spacer to emphasize fade */}
+            <div className="h-64"></div>
           </div>
         </div>
+
       </div>
     </div>
   );

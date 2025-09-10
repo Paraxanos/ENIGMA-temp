@@ -2,6 +2,7 @@
 
 import BackgroundRippleEffectDemo from "../components/background-ripple-effect-demo"
 import { FloatingNav } from "@/components/ui/floating-navbar"
+import { TextGenerateEffect } from "@/components/ui/text-generate-effect"
 
 export default function SyntheticV0PageForDeployment() {
   return(
