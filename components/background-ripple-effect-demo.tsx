@@ -1,0 +1,187 @@
+"use client";
+import React, { useEffect, useState, useCallback, useRef } from "react";
+
+const ROWS = 20;
+const COLS = 40;
+
+const BackgroundRippleEffect: React.FC = () => {
+  const [grid, setGrid] = useState<Array<{ id: number; char: string; isRipple?: boolean }>>([]);
+  const gridRef = useRef(grid);
+
+  const generateRandomChar = useCallback(() => {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    return chars[Math.floor(Math.random() * chars.length)];
+  }, []);
+
+  const generateBinaryChar = useCallback(() => {
+    return Math.random() > 0.5 ? "0" : "1";
+  }, []);
+
+  useEffect(() => {
+    const initialGrid = [];
+    for (let i = 0; i < ROWS * COLS; i++) {
+      initialGrid.push({ id: i, char: generateRandomChar() });
+    }
+    setGrid(initialGrid);
+    gridRef.current = initialGrid;
+  }, [generateRandomChar]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setGrid((prev) =>
+        prev.map((cell) => ({
+          ...cell,
+          char: Math.random() > 0.9 ? generateRandomChar() : cell.char,
+          isRipple: false,
+        }))
+      );
+    }, 300);
+
+    return () => clearInterval(interval);
+  }, [generateRandomChar]);
+
+  const handleCellClick = useCallback(
+    (id: number) => {
+      const centerRow = Math.floor(id / COLS);
+      const centerCol = id % COLS;
+
+      const maxDistance = Math.max(
+        centerRow,
+        ROWS - 1 - centerRow,
+        centerCol,
+        COLS - 1 - centerCol
+      );
+
+      setGrid((prev) =>
+        prev.map((cell) => ({
+          ...cell,
+          isRipple: false,
+        }))
+      );
+
+      for (let distance = 0; distance <= maxDistance; distance++) {
+        setTimeout(() => {
+          setGrid((prev) => {
+            return prev.map((cell, idx) => {
+              const row = Math.floor(idx / COLS);
+              const col = idx % COLS;
+              const dRow = Math.abs(row - centerRow);
+              const dCol = Math.abs(col - centerCol);
+              const manhattanDistance = dRow + dCol;
+
+              if (manhattanDistance === distance) {
+                return {
+                  ...cell,
+                  char: generateBinaryChar(),
+                  isRipple: true,
+                };
+              }
+              return cell;
+            });
+          });
+
+          setTimeout(() => {
+            setGrid((prev) =>
+              prev.map((cell, idx) => {
+                const row = Math.floor(idx / COLS);
+                const col = idx % COLS;
+                const dRow = Math.abs(row - centerRow);
+                const dCol = Math.abs(col - centerCol);
+                const manhattanDistance = dRow + dCol;
+
+                if (manhattanDistance === distance) {
+                  return {
+                    ...cell,
+                    isRipple: false,
+                  };
+                }
+                return cell;
+              })
+            );
+          }, 300);
+        }, distance * 70);
+      }
+    },
+    [generateBinaryChar]
+  );
+
+  return (
+    <div className="absolute inset-0 grid h-full w-full grid-cols-40 grid-rows-20 bg-black">
+      {grid.map((cell) => (
+        <div
+          key={cell.id}
+          onClick={() => handleCellClick(cell.id)}
+          className={`flex cursor-pointer items-center justify-center border border-neutral-900 bg-black text-xs font-mono transition-colors hover:bg-green-900/20 active:bg-green-800/40 ${
+            cell.isRipple
+              ? "text-green-300 animate-pulse font-bold drop-shadow-md"
+              : "text-green-400"
+          }`}
+          style={{
+            WebkitTapHighlightColor: "transparent",
+          }}
+        >
+          {cell.char}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+export default function BackgroundRippleEffectDemo() {
+  return (
+    <div className="relative w-full overflow-hidden bg-black">
+      {/* Extend page height */}
+      <div className="relative h-[200vh] w-full">
+
+        {/* Animated Grid Background (covers full viewport height) */}
+        <div className="fixed inset-0 z-0 pointer-events-none">
+          <BackgroundRippleEffect />
+        </div>
+
+        {/* Vignette Overlay */}
+        <div
+          className="fixed inset-0 z-10 pointer-events-none"
+          style={{
+            background:
+              "radial-gradient(ellipse at center, transparent 50%, rgba(0, 0, 0, 0.6) 100%)",
+          }}
+        />
+
+        {/* Fade to Black Gradient Overlay (from 50% down to bottom) */}
+        <div
+          className="fixed inset-0 z-10 pointer-events-none"
+          style={{
+            background: "linear-gradient(to bottom, transparent 50%, rgba(0, 0, 0, 0.3) 70%, rgba(0, 0, 0, 1) 100%)",
+            maskImage: "linear-gradient(to bottom, black 50%, transparent 100%)", // Optional: smoother fade
+            WebkitMaskImage: "linear-gradient(to bottom, black 50%, transparent 100%)",
+          }}
+        />
+
+        {/* Content — pinned in center of viewport */}
+        <div className="relative z-20 flex flex-col items-center justify-start pt-60 px-4 text-center">
+          <h2 className="mx-auto max-w-4xl text-2xl font-bold text-neutral-100 md:text-4xl lg:text-7xl">
+            Welcome to Enigma
+          </h2>
+          <p className="mx-auto mt-4 max-w-xl text-neutral-400">
+            The System Software Club
+          </p>
+
+          {/* Spacer to push content up and allow scrolling into fade */}
+          <div className="mt-40 h-96"></div>
+
+          {/* Optional: Add more content that fades into darkness */}
+          <div className="w-full max-w-3xl mt-20 text-neutral-500 space-y-6 opacity-90">
+            <p className="text-lg">
+              Scroll down to descend into the digital abyss. The grid continues infinitely —
+              but the light fades, as all things must.
+            </p>
+            <p>
+              Click anywhere to send a pulse — a ripple of 0s and 1s — echoing into the void.
+            </p>
+            <div className="h-64"></div> {/* Extra spacer to emphasize fade */}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
