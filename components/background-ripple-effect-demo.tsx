@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState, useCallback, useRef } from "react";
-import { TextGenerateEffect } from "./ui/text-generate-effect"; // ✅ Make sure path is correct
+import { TextGenerateEffect } from "./ui/text-generate-effect";
 
 const ROWS = 20;
 const COLS = 40;
@@ -43,6 +43,7 @@ const BackgroundRippleEffect: React.FC = () => {
 
   const handleCellClick = useCallback(
     (id: number) => {
+      console.log("Cell clicked:", id); // 👈 Debug log
       const centerRow = Math.floor(id / COLS);
       const centerCol = id % COLS;
 
@@ -134,12 +135,12 @@ export default function BackgroundRippleEffectDemo() {
       {/* Extend page height */}
       <div className="relative h-[200vh] w-full">
 
-        {/* Animated Grid Background */}
-        <div className="fixed inset-0 z-0 pointer-events-none">
+        {/* ✅ Animated Grid Background — receives clicks */}
+        <div className="fixed inset-0 z-0">
           <BackgroundRippleEffect />
         </div>
 
-        {/* Vignette Overlay */}
+        {/* ✅ Vignette Overlay — non-blocking */}
         <div
           className="fixed inset-0 z-10 pointer-events-none"
           style={{
@@ -148,7 +149,7 @@ export default function BackgroundRippleEffectDemo() {
           }}
         />
 
-        {/* Fade to Black Gradient */}
+        {/* ✅ Fade to Black Gradient — non-blocking */}
         <div
           className="fixed inset-0 z-10 pointer-events-none"
           style={{
@@ -156,22 +157,19 @@ export default function BackgroundRippleEffectDemo() {
           }}
         />
 
-        {/* ✅ SCROLLABLE CONTENT — TITLE AT THE TOP (NO FIXED POSITIONING) */}
-        <div className="relative z-20 flex flex-col items-center justify-start pt-60 px-4 text-center">
-          {/* ✅ ANIMATED TITLE — NOW IN NORMAL FLOW, WILL SCROLL AWAY */}
-          <TextGenerateEffect
-            words="Welcome To"
-            className="mb-6"
-            duration={2}
-          />
-          <TextGenerateEffect
-            words="ENIGMA"
-            className="mb-6"
-            duration={2.4}
-          />
-          <p className="text-lg md:text-xl text-green-400 max-w-2xl mx-auto font-medium">
-            The System Software Club
-          </p>
+        {/* ✅ SCROLLABLE CONTENT — MAKE IT NON-BLOCKING */}
+        <div
+          className="relative z-20 flex flex-col items-center justify-start pt-60 px-4 text-center pointer-events-none"
+          // 👆👆👆 Added pointer-events-none to let clicks fall through
+        >
+          {/* 👇 Re-enable pointer events only on text (if needed) — but text is non-interactive */}
+          <div className="pointer-events-auto">
+            <TextGenerateEffect words="Welcome To" className="mb-6" duration={2} />
+            <TextGenerateEffect words="ENIGMA" className="mb-6" duration={2.4} />
+            <p className="text-lg md:text-xl text-green-400 max-w-2xl mx-auto font-medium">
+              The System Software Club
+            </p>
+          </div>
 
           {/* Spacer */}
           <div className="mt-40 h-96"></div>
