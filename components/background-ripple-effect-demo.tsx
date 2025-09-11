@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import { TextGenerateEffect } from "./ui/text-generate-effect";
+import { TypewriterEffectSmooth } from "./ui/typewriter-effect"; // ✅ Import Typewriter
 
 const ROWS = 20;
 const COLS = 40;
@@ -43,7 +44,7 @@ const BackgroundRippleEffect: React.FC = () => {
 
   const handleCellClick = useCallback(
     (id: number) => {
-      console.log("Cell clicked:", id); // 👈 Debug log
+      console.log("Cell clicked:", id);
       const centerRow = Math.floor(id / COLS);
       const centerCol = id % COLS;
 
@@ -130,17 +131,21 @@ const BackgroundRippleEffect: React.FC = () => {
 };
 
 export default function BackgroundRippleEffectDemo() {
+  // ✅ Define words for typewriter effect
+  const words = [
+    { text: "Where", className: "text-white" },
+    { text: "code", className: "text-white" },
+    { text: "meets", className: "text-white" },
+    { text: "curiosity.", className: "text-blue-500" },
+  ];
+
   return (
     <div className="relative w-full overflow-hidden bg-black">
-      {/* Extend page height */}
       <div className="relative h-[200vh] w-full">
-
-        {/* ✅ Animated Grid Background — receives clicks */}
         <div className="fixed inset-0 z-0">
           <BackgroundRippleEffect />
         </div>
 
-        {/* ✅ Vignette Overlay — non-blocking */}
         <div
           className="fixed inset-0 z-10 pointer-events-none"
           style={{
@@ -149,7 +154,6 @@ export default function BackgroundRippleEffectDemo() {
           }}
         />
 
-        {/* ✅ Fade to Black Gradient — non-blocking */}
         <div
           className="fixed inset-0 z-10 pointer-events-none"
           style={{
@@ -157,24 +161,19 @@ export default function BackgroundRippleEffectDemo() {
           }}
         />
 
-        {/* ✅ SCROLLABLE CONTENT — MAKE IT NON-BLOCKING */}
         <div
           className="relative z-20 flex flex-col items-center justify-start pt-60 px-4 text-center pointer-events-none"
-          // 👆👆👆 Added pointer-events-none to let clicks fall through
         >
-          {/* 👇 Re-enable pointer events only on text (if needed) — but text is non-interactive */}
           <div className="pointer-events-auto">
             <TextGenerateEffect words="Welcome To" className="mb-6" duration={2} />
             <TextGenerateEffect words="ENIGMA" className="mb-6" duration={2.4} />
-            <p className="text-lg md:text-xl text-green-400 max-w-2xl mx-auto font-medium">
-              The System Software Club
-            </p>
+            
+            {/* ✅ Typewriter Effect inserted here */}
+            <TypewriterEffectSmooth words={words} className="mb-6" />
           </div>
 
-          {/* Spacer */}
           <div className="mt-40 h-96"></div>
 
-          {/* More scrollable content */}
           <div className="w-full max-w-3xl mt-20 text-neutral-500 space-y-6 opacity-90">
             <p className="text-lg">
               Scroll down to descend into the digital abyss. The grid continues infinitely —
@@ -186,7 +185,6 @@ export default function BackgroundRippleEffectDemo() {
             <div className="h-64"></div>
           </div>
         </div>
-
       </div>
     </div>
   );
