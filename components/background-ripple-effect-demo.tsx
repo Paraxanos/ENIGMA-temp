@@ -1,14 +1,34 @@
 "use client";
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import { TextGenerateEffect } from "./ui/text-generate-effect";
-import { TypewriterEffectSmooth } from "./ui/typewriter-effect"; // ✅ Import Typewriter
+import { TypewriterEffectSmooth } from "./ui/typewriter-effect";
 
-const ROWS = 20;
-const COLS = 40;
+// Responsive grid sizes
+const MOBILE_ROWS = 12;
+const MOBILE_COLS = 24;
+const DESKTOP_ROWS = 20;
+const DESKTOP_COLS = 40;
 
 const BackgroundRippleEffect: React.FC = () => {
   const [grid, setGrid] = useState<Array<{ id: number; char: string; isRipple?: boolean }>>([]);
   const gridRef = useRef(grid);
+
+  // Responsive dimensions
+  const [rows, setRows] = useState(DESKTOP_ROWS);
+  const [cols, setCols] = useState(DESKTOP_COLS);
+
+  // Detect screen size and update grid dimensions
+  const updateGridSize = useCallback(() => {
+    const isMobile = window.innerWidth < 768;
+    setRows(isMobile ? MOBILE_ROWS : DESKTOP_ROWS);
+    setCols(isMobile ? MOBILE_COLS : DESKTOP_COLS);
+  }, []);
+
+  useEffect(() => {
+    updateGridSize();
+    window.addEventListener("resize", updateGridSize);
+    return () => window.removeEventListener("resize", updateGridSize);
+  }, [updateGridSize]);
 
   const generateRandomChar = useCallback(() => {
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -21,12 +41,13 @@ const BackgroundRippleEffect: React.FC = () => {
 
   useEffect(() => {
     const initialGrid = [];
-    for (let i = 0; i < ROWS * COLS; i++) {
+    const totalCells = rows * cols;
+    for (let i = 0; i < totalCells; i++) {
       initialGrid.push({ id: i, char: generateRandomChar() });
     }
     setGrid(initialGrid);
     gridRef.current = initialGrid;
-  }, [generateRandomChar]);
+  }, [generateRandomChar, rows, cols]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -45,14 +66,14 @@ const BackgroundRippleEffect: React.FC = () => {
   const handleCellClick = useCallback(
     (id: number) => {
       console.log("Cell clicked:", id);
-      const centerRow = Math.floor(id / COLS);
-      const centerCol = id % COLS;
+      const centerRow = Math.floor(id / cols);
+      const centerCol = id % cols;
 
       const maxDistance = Math.max(
         centerRow,
-        ROWS - 1 - centerRow,
+        rows - 1 - centerRow,
         centerCol,
-        COLS - 1 - centerCol
+        cols - 1 - centerCol
       );
 
       setGrid((prev) =>
@@ -66,8 +87,8 @@ const BackgroundRippleEffect: React.FC = () => {
         setTimeout(() => {
           setGrid((prev) => {
             return prev.map((cell, idx) => {
-              const row = Math.floor(idx / COLS);
-              const col = idx % COLS;
+              const row = Math.floor(idx / cols);
+              const col = idx % cols;
               const dRow = Math.abs(row - centerRow);
               const dCol = Math.abs(col - centerCol);
               const manhattanDistance = dRow + dCol;
@@ -86,8 +107,8 @@ const BackgroundRippleEffect: React.FC = () => {
           setTimeout(() => {
             setGrid((prev) =>
               prev.map((cell, idx) => {
-                const row = Math.floor(idx / COLS);
-                const col = idx % COLS;
+                const row = Math.floor(idx / cols);
+                const col = idx % cols;
                 const dRow = Math.abs(row - centerRow);
                 const dCol = Math.abs(col - centerCol);
                 const manhattanDistance = dRow + dCol;
@@ -105,22 +126,30 @@ const BackgroundRippleEffect: React.FC = () => {
         }, distance * 70);
       }
     },
-    [generateBinaryChar]
+    [generateBinaryChar, rows, cols]
   );
 
   return (
-    <div className="absolute inset-0 grid h-full w-full grid-cols-40 grid-rows-20 bg-black">
+    <div
+      className="absolute inset-0 grid h-full w-full"
+      style={{
+        gridTemplateColumns: `repeat(${cols}, 1fr)`,
+        gridTemplateRows: `repeat(${rows}, 1fr)`,
+      }}
+    >
       {grid.map((cell) => (
         <div
           key={cell.id}
           onClick={() => handleCellClick(cell.id)}
-          className={`flex cursor-pointer items-center justify-center border border-neutral-900 bg-black text-xs font-mono transition-colors hover:bg-green-900/20 active:bg-green-800/40 ${
+          className={`flex cursor-pointer items-center justify-center border border-neutral-900 bg-black font-mono transition-colors hover:bg-green-900/20 active:bg-green-800/40 ${
             cell.isRipple
               ? "text-green-300 animate-pulse font-bold drop-shadow-md"
               : "text-green-400"
           }`}
           style={{
             WebkitTapHighlightColor: "transparent",
+            fontSize: `${rows === MOBILE_ROWS ? '0.75rem' : '0.8rem'}`, // Larger on desktop, slightly smaller but still readable on mobile
+            letterSpacing: '0.05em', // Improves character spacing for better clarity
           }}
         >
           {cell.char}
@@ -131,7 +160,6 @@ const BackgroundRippleEffect: React.FC = () => {
 };
 
 export default function BackgroundRippleEffectDemo() {
-  // ✅ Define words for typewriter effect
   const words = [
     { text: "Where", className: "text-white" },
     { text: "code", className: "text-white" },
@@ -142,10 +170,12 @@ export default function BackgroundRippleEffectDemo() {
   return (
     <div className="relative w-full overflow-hidden bg-black">
       <div className="relative h-[200vh] w-full">
+        {/* Background Grid */}
         <div className="fixed inset-0 z-0">
           <BackgroundRippleEffect />
         </div>
 
+        {/* Subtle radial gradient overlay */}
         <div
           className="fixed inset-0 z-10 pointer-events-none"
           style={{
@@ -154,21 +184,21 @@ export default function BackgroundRippleEffectDemo() {
           }}
         />
 
+        {/* Dark bottom gradient for depth */}
         <div
           className="fixed inset-0 z-10 pointer-events-none"
           style={{
-            background: "linear-gradient(to bottom, transparent 50%, rgba(0, 0, 0, 0.3) 70%, rgba(0, 0, 0, 1) 100%)",
+            background:
+              "linear-gradient(to bottom, transparent 50%, rgba(0, 0, 0, 0.3) 70%, rgba(0, 0, 0, 1) 100%)",
           }}
         />
 
-        <div
-          className="relative z-20 flex flex-col items-center justify-start pt-60 px-4 text-center pointer-events-none"
-        >
+        {/* Centered Content */}
+        <div className="relative z-20 flex flex-col items-center justify-start pt-60 px-4 text-center pointer-events-none">
           <div className="pointer-events-auto">
             <TextGenerateEffect words="Welcome To" className="mb-6" duration={2} />
             <TextGenerateEffect words="ENIGMA" className="mb-6" duration={2.4} />
-            
-            {/* ✅ Typewriter Effect inserted here */}
+
             <TypewriterEffectSmooth words={words} className="mb-6" />
           </div>
 

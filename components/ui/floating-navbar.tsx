@@ -5,7 +5,7 @@ import {
   AnimatePresence,
   useScroll,
   useMotionValueEvent,
-} from "framer-motion"; // ✅ Fixed import — "motion/react" is incorrect
+} from "framer-motion";
 import { cn } from "@/lib/utils";
 
 export const FloatingNav = ({
@@ -53,12 +53,12 @@ export const FloatingNav = ({
           duration: 0.2,
         }}
         className={cn(
-          // ✅ Removed asymmetric padding — now symmetric for true centering
-          "flex max-w-fit fixed top-5 inset-x-0 mx-auto px-6 py-3 items-center justify-center space-x-6",
-          // ✅ Fully dark-themed with subtle border and shadow
+          "flex max-w-fit fixed top-5 inset-x-0 mx-auto px-4 py-2.5 items-center justify-center space-x-4",
           "rounded-full bg-neutral-900/80 backdrop-blur-md border border-neutral-800/50",
           "shadow-lg shadow-black/20",
           "text-white z-[5000]",
+          // Ensure clickable area is large enough on mobile
+          "min-h-10",
           className
         )}
       >
@@ -68,13 +68,21 @@ export const FloatingNav = ({
             href={navItem.link}
             className={cn(
               "relative flex items-center space-x-2 text-sm font-medium transition-colors duration-200",
-              "hover:text-neutral-300 text-neutral-400"
+              "hover:text-neutral-300 text-neutral-400",
+              // Make tap target larger on mobile
+              "px-3 py-2 rounded-full hover:bg-white/10"
             )}
           >
+            {/* Show icon on mobile, name on desktop */}
             {navItem.icon && (
               <span className="block sm:hidden">{navItem.icon}</span>
             )}
+            {/* Always show name on desktop; on mobile, show name ONLY if no icon */}
             <span className="hidden sm:block">{navItem.name}</span>
+            {/* On mobile, if no icon, show name as fallback */}
+            {!navItem.icon && (
+              <span className="block sm:hidden">{navItem.name}</span>
+            )}
           </a>
         ))}
       </motion.div>
