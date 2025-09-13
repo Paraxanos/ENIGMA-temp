@@ -135,6 +135,10 @@ const BackgroundRippleEffect: React.FC = () => {
       style={{
         gridTemplateColumns: `repeat(${cols}, 1fr)`,
         gridTemplateRows: `repeat(${rows}, 1fr)`,
+        userSelect: 'none', // Prevent selection on entire grid
+        MozUserSelect: 'none',
+        MsUserSelect: 'none',
+        OUserSelect: 'none',
       }}
     >
       {grid.map((cell) => (
@@ -148,8 +152,12 @@ const BackgroundRippleEffect: React.FC = () => {
           }`}
           style={{
             WebkitTapHighlightColor: "transparent",
-            fontSize: `${rows === MOBILE_ROWS ? '0.75rem' : '0.8rem'}`, // Larger on desktop, slightly smaller but still readable on mobile
-            letterSpacing: '0.05em', // Improves character spacing for better clarity
+            fontSize: `${rows === MOBILE_ROWS ? '0.75rem' : '0.8rem'}`,
+            letterSpacing: '0.05em',
+            userSelect: 'none', // Prevent selection on individual cells
+            MozUserSelect: 'none',
+            MsUserSelect: 'none',
+            OUserSelect: 'none',
           }}
         >
           {cell.char}
